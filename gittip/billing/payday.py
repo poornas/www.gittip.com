@@ -141,6 +141,7 @@ class Payday(object):
         self.clear_pending_to_balance()
         self.payout(ts_start, self.genparticipants(ts_start, False))
         self.set_nactive(ts_start)
+        self.update_receiving_amounts()
 
         self.end()
 
@@ -369,6 +370,31 @@ class Payday(object):
              WHERE ts_end='1970-01-01T00:00:00+00'::timestamptz
 
         """, {'ts_start': ts_start})
+
+    def update_receiving_amounts(self):
+        ncc_failing = self.db.one("""
+            SELECT ncc_failing
+              FROM paydays
+             WHERE ts_end='1970-01-01T00:00:00+00'::timestamptz
+        """)
+        if ncc_failing == 0:
+            return
+        UPDATE = """
+            CREATE TEMPORARY VIEW total_receiving AS
+                SELECT tippee, sum(amount) AS amount
+                  FROM current_tips
+                  JOIN participants p ON p.username = tipper
+                 WHERE p.is_suspicious IS NOT TRUE
+                   AND p.last_bill_result = ''
+              GROUP BY tippee;
+
+            UPDATE participants
+               SET receiving = amount
+              FROM total_receiving
+             WHERE tippee = username;
+        """
+        with self.db.get_cursor() as cursor:
+            cursor.execute(UPDATE)
 
     def end(self):
         self.db.one("""\
