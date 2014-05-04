@@ -46,7 +46,7 @@ if participant.goal != 0:
 #   3.00 - user receives this amount in tips
 
 if not participant.anonymous_receiving:
-    receiving = str(participant.get_dollars_receiving())
+    receiving = str(participant.receiving)
 else:
     receiving = None
 output["receiving"] = receiving
@@ -60,7 +60,7 @@ output["receiving"] = receiving
 #   3.00 - user gives this amount in tips
 
 if not participant.anonymous_giving:
-    giving = str(participant.get_dollars_giving())
+    giving = str(participant.giving)
 else:
     giving = None
 output["giving"] = giving

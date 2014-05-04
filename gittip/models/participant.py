@@ -471,48 +471,6 @@ class Participant(Model, MixinTeam):
         """, (self.username, tippee), default=Decimal('0.00'))
 
 
-    def get_dollars_receiving(self):
-        """Return a Decimal.
-        """
-        return self.db.one("""\
-
-            SELECT sum(amount)
-              FROM ( SELECT DISTINCT ON (tipper)
-                            amount
-                          , tipper
-                       FROM tips
-                       JOIN participants p ON p.username = tipper
-                      WHERE tippee=%s
-                        AND last_bill_result = ''
-                        AND is_suspicious IS NOT true
-                   ORDER BY tipper
-                          , mtime DESC
-                    ) AS foo
-
-        """, (self.username,), default=Decimal('0.00'))
-
-
-    def get_dollars_giving(self):
-        """Return a Decimal.
-        """
-        return self.db.one("""\
-
-            SELECT sum(amount)
-              FROM ( SELECT DISTINCT ON (tippee)
-                            amount
-                          , tippee
-                       FROM tips
-                       JOIN participants p ON p.username = tippee
-                      WHERE tipper=%s
-                        AND is_suspicious IS NOT true
-                        AND claimed_time IS NOT NULL
-                   ORDER BY tippee
-                          , mtime DESC
-                    ) AS foo
-
-        """, (self.username,), default=Decimal('0.00'))
-
-
     def get_number_of_backers(self):
         """Given a unicode, return an int.
         """
@@ -762,8 +720,8 @@ class Participant(Model, MixinTeam):
 
     def get_og_title(self):
         out = self.username
-        receiving = self.get_dollars_receiving()
-        giving = self.get_dollars_giving()
+        receiving = self.receiving
+        giving = self.giving
         if (giving > receiving) and not self.anonymous_giving:
             out += " gives $%.2f/wk" % giving
         elif receiving > 0 and not self.anonymous_receiving:
