@@ -809,10 +809,9 @@ class Participant(Model, MixinTeam):
 
             -- Get all the latest tips from everyone to everyone.
 
-            SELECT DISTINCT ON (tipper, tippee)
-                   ctime, tipper, tippee, amount
-              FROM tips
-          ORDER BY tipper, tippee, mtime DESC;
+            SELECT ctime, tipper, tippee, amount
+              FROM current_tips
+             WHERE amount > 0;
 
         """
 
@@ -835,10 +834,6 @@ class Participant(Model, MixinTeam):
                 AND NOT (tipper = %(dead)s OR tipper = %(live)s)
                         -- Don't include tips *from* the dead or live account,
                         -- lest we convert cross-tipping to self-tipping.
-
-                    AND amount > 0
-                        -- Don't include zeroed out tips, so we avoid a no-op
-                        -- zero tip entry.
 
                GROUP BY tipper
 
@@ -864,10 +859,6 @@ class Participant(Model, MixinTeam):
                         -- Don't include tips *to* the dead or live account,
                         -- lest we convert cross-tipping to self-tipping.
 
-                    AND amount > 0
-                        -- Don't include zeroed out tips, so we avoid a no-op
-                        -- zero tip entry.
-
                GROUP BY tippee
 
         """
@@ -878,7 +869,7 @@ class Participant(Model, MixinTeam):
 
                 SELECT ctime, tipper, tippee, 0 AS amount
                   FROM __temp_unique_tips
-                 WHERE tippee=%s AND amount > 0
+                 WHERE tippee=%s
 
         """
 
@@ -888,7 +879,7 @@ class Participant(Model, MixinTeam):
 
                 SELECT ctime, tipper, tippee, 0 AS amount
                   FROM __temp_unique_tips
-                 WHERE tipper=%s AND amount > 0
+                 WHERE tipper=%s
 
         """
 
