@@ -32,10 +32,11 @@ class TestChartOfReceiving(Harness):
     def setUp(self):
         Harness.setUp(self)
         for participant in ['alice', 'bob']:
-            self.make_participant(participant, last_bill_result='')
+            p = self.make_participant(participant, last_bill_result='')
+            setattr(self, participant, p)
 
     def test_get_tip_distribution_handles_a_tip(self):
-        Participant.from_username('alice').set_tip_to('bob', '3.00')
+        Participant.from_username('alice').set_tip_to(self.bob, '3.00')
         expected = ([[Decimal('3.00'), 1, Decimal('3.00'), 1.0, Decimal('1')]],
                     1.0, Decimal('3.00'))
         actual = Participant.from_username('bob').get_tip_distribution()
@@ -48,8 +49,8 @@ class TestChartOfReceiving(Harness):
 
     def test_get_tip_distribution_handles_multiple_tips(self):
         self.make_participant('carl', last_bill_result='')
-        Participant.from_username('alice').set_tip_to('bob', '1.00')
-        Participant.from_username('carl').set_tip_to('bob', '3.00')
+        Participant.from_username('alice').set_tip_to(self.bob, '1.00')
+        Participant.from_username('carl').set_tip_to(self.bob, '3.00')
         expected = ([
             [Decimal('1.00'), 1L, Decimal('1.00'), 0.5, Decimal('0.25')],
             [Decimal('3.00'), 1L, Decimal('3.00'), 0.5, Decimal('0.75')]
@@ -68,8 +69,8 @@ class TestChartOfReceiving(Harness):
 
     def test_get_tip_distribution_ignores_missing_cc(self):
         self.make_participant('missing_cc', last_bill_result=None)
-        Participant.from_username('alice').set_tip_to('bob', '1.00')
-        Participant.from_username('missing_cc').set_tip_to('bob', '3.00')
+        Participant.from_username('alice').set_tip_to(self.bob, '1.00')
+        Participant.from_username('missing_cc').set_tip_to(self.bob, '3.00')
         expected = ([[Decimal('1.00'), 1L, Decimal('1.00'), 1, Decimal('1')]],
                     1.0, Decimal('1.00'))
         actual = Participant.from_username('bob').get_tip_distribution()

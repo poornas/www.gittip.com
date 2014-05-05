@@ -41,4 +41,4 @@ for tip in tips:
          , tip.tippee.username.ljust(12)
          , str(tip.amount).rjust(6)
           )
-    tip.tipper.set_tip_to(tip.tippee.username, '0.00')
+    tip.tipper.set_tip_to(tip.tippee, '0.00')
