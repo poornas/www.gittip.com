@@ -246,10 +246,10 @@ class Payday(object):
                                                    , available
                                                     ))
 
-            def tip(member, amount):
+            def tip(tippee, amount):
                 tip = {}
                 tip['tipper'] = participant.username
-                tip['tippee'] = member['username']
+                tip['tippee'] = tippee
                 tip['amount'] = amount
                 tip['claimed_time'] = ts_start
                 self.tip( participant
@@ -257,12 +257,11 @@ class Payday(object):
                         , ts_start
                         , pachinko=True
                          )
-                return tip['amount']
 
-            for member in participant.get_members():
-                amount = min(member['take'], available)
+            for take in participant.get_current_takes():
+                amount = min(take['amount'], available)
                 available -= amount
-                tip(member, amount)
+                tip(take['member'], amount)
                 if available == 0:
                     break
 
@@ -455,7 +454,7 @@ class Payday(object):
                 return False
 
             self.credit_participant(cursor, tippee, amount)
-            self.record_transfer(cursor, tipper, tippee, amount)
+            self.record_transfer(cursor, tipper, tippee, amount, pachinko)
             if pachinko:
                 self.mark_pachinko(cursor, amount)
             else:
@@ -836,14 +835,14 @@ class Payday(object):
                                     ))
 
 
-    def record_transfer(self, cursor, tipper, tippee, amount):
+    def record_transfer(self, cursor, tipper, tippee, amount, as_team_member=False):
         cursor.run("""\
 
           INSERT INTO transfers
-                      (tipper, tippee, amount)
-               VALUES (%s, %s, %s)
+                      (tipper, tippee, amount, as_team_member)
+               VALUES (%s, %s, %s, %s)
 
-        """, (tipper, tippee, amount))
+        """, (tipper, tippee, amount, as_team_member))
 
 
     def mark_missing_funding(self):

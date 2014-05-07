@@ -236,10 +236,10 @@ class Participant(Model, MixinTeam):
 
             SELECT team AS name
                  , ( SELECT count(*)
-                       FROM current_memberships
+                       FROM current_takes
                       WHERE team=x.team
                     ) AS nmembers
-              FROM current_memberships x
+              FROM current_takes x
              WHERE member=%s;
 
         """, (self.username,))
@@ -313,6 +313,22 @@ class Participant(Model, MixinTeam):
             self.set_attributes(username=suggested, username_lower=lowercased)
 
         return suggested
+
+    def update_avatar(self):
+        avatar_url = self.db.run("""
+            UPDATE participants p
+               SET avatar_url = (
+                       SELECT avatar_url
+                         FROM elsewhere
+                        WHERE participant = p.username
+                     ORDER BY platform = 'github' DESC,
+                              avatar_url LIKE '%%gravatar.com%%' DESC
+                        LIMIT 1
+                   )
+             WHERE p.username = %s
+         RETURNING avatar_url
+        """, (self.username,))
+        self.set_attributes(avatar_url=avatar_url)
 
     def update_email(self, email, confirmed=False):
         with self.db.get_cursor() as c:
@@ -1014,6 +1030,8 @@ class Participant(Model, MixinTeam):
                              )
                            )
 
+        self.update_avatar()
+
     def delete_elsewhere(self, platform, user_id):
         """Deletes account elsewhere unless the user would not be able
         to log in anymore.
@@ -1038,6 +1056,7 @@ class Participant(Model, MixinTeam):
                 RETURNING participant
             """, (self.username, platform, user_id), default=NonexistingElsewhere)
             add_event(c, 'participant', dict(id=self.id, action='disconnect', values=dict(platform=platform, user_id=user_id)))
+        self.update_avatar()
 
 
 class NeedConfirmation(Exception):

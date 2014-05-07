@@ -13,14 +13,19 @@ Quick Start
 Vagrant
 -------
 
+Given VirtualBox 4.3 and Vagrant 1.5.4:
+
 ```
 $ vagrant up
 ```
 
 [Read more](#vagrant-1).
 
+
 Docker
 -------
+
+Given some version(?) of Docker:
 
 ```
 $ docker build -t gittip .
@@ -30,9 +35,11 @@ $ docker run -p 8537:8537 gittip
 [Read more](#docker-1).
 
 
-Manual Quick Start
-------------------
-If you'd prefer to run on your machine directly, you can run these commands:
+Local 
+-----
+
+Given Python 2.7, Postgres 9.3, and a C/make toolchain:
+
 ```
 $ git clone git@github.com:gittip/www.gittip.com.git
 $ cd www.gittip.com
@@ -48,9 +55,6 @@ And/or:
 $ make test
 ```
 
-We also include a
-[Vagrantfile](https://github.com/gittip/www.gittip.com/blob/master/Vagrantfile).
-
 
 Table of Contents
 =================
@@ -59,9 +63,10 @@ Table of Contents
   - [Dependencies](#dependencies)
   - [Building](#building)
   - [Launching](#launching)
-  - [Docker](#docker)  
+  - [Vagrant](#vagrant)
+  - [Docker](#docker)
   - [Help!](#help)
- - [Configuration](#configuration)
+ - [Configuration](https://github.com/gittip/www.gittip.com/wiki/Configuration)
  - [Modifying CSS](#modifying-css)
  - [Testing](#testing-)
  - [Setting up a Database](#local-database-setup)
@@ -105,8 +110,6 @@ running `make`, then add
 for more information](http://stackoverflow.com/a/22355874/347246)):
 
     $ ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future
-    
-    
 
 Building
 --------
@@ -200,11 +203,18 @@ Vagrant
 -------
 If you have vagrant installed, you can run gittip by running `vagrant up` from the project directory. Please note that if you ever switch between running gittip on your own machine to vagrant or vice versa, you will need to run `make clean`.
 
+If you're using Vagrant for the first time you'll need [Vagrant](http://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/) installed. If you're on Linux you'll need to install `nfs-kernel-server`.
+
 The Vagrantfile will download a custom made image from the internet. If you have a slow internet connection, you can download a local copy of this file, by running:
 
 `curl http://downloads.gittipllc.netdna-cdn.com/gittip.box`
 
 Once downloaded, vagrant will use this local file automatically when you run `vagrant up`. Vagrant is setup to use key based SSH authentication, if you're prompted for a password please use `vagrant`.
+
+**Ubuntu users:** If you experience problems, please see [this
+issue](https://github.com/gittip/www.gittip.com/pull/2321#issuecomment-41455169).
+As mentioned, you will also need to be wary of projects that are nested
+in encrypted directories.
 
 Docker
 ------------
@@ -270,43 +280,10 @@ Help!
 
 If you get stuck somewhere along the way, you can find help in the #gittip
 channel on [Freenode](http://webchat.freenode.net/) or in the [issue
-tracker](/gittip/www.gittip.com/issues/new) here on GitHub. If all else fails
-ping [@whit537](https://twitter.com/whit537) on Twitter or email
-[chad@gittip.com](mailto:chad@gittip.com).
+tracker](/gittip/www.gittip.com/issues/new) here on GitHub.
 
 Thanks for installing Gittip! :smiley:
 
-
-Configuration
-=============
-
-Gittip's default configuration lives in [`defaults.env`](https://github.com/gittip/www.gittip.com/blob/master/defaults.env).
-If you'd like to override some settings, create a file named `local.env` to store them.
-
-The following explains some of the content of that file:
-
-The `BALANCED_API_SECRET` is a test marketplace. To generate a new secret for
-your own testing run this command:
-
-    curl -X POST https://api.balancedpayments.com/v1/api_keys | grep secret
-
-Grab that secret and also create a new marketplace to test against:
-
-    curl -X POST https://api.balancedpayments.com/v1/marketplaces -u <your_secret>:
-
-The site works without this, except for the credit card page. Visit the
-[Balanced Documentation](https://www.balancedpayments.com/docs) if you want to
-know more about creating marketplaces.
-
-The GITHUB_* keys are for a gittip-dev application in the Gittip organization
-on Github. It points back to localhost:8537, which is where Gittip will be
-running if you start it locally with `make run`. Similarly with the TWITTER_*
-keys, but there they required us to spell it `127.0.0.1`.
-
-If you wish to use different username or database name for the database, you
-should change the `DATABASE_URL` using the following format:
-
-    DATABASE_URL=postgres://<username>@localhost/<database name>
 
 Modifying CSS
 =============
