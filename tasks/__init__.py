@@ -11,17 +11,11 @@ from gittip import wireup
     help={
         'username': "Gittip username. (required)",
         'email':    "PayPal email address. (required)",
-        'api-key-fragment': "First 8 characters of user's API key.",
+        'api-key-fragment': "First 8 characters of user's API key. (required)",
         'overwrite': "Override existing PayPal email?",
     }
 )
 def set_paypal_email(username='', email='', api_key_fragment='', overwrite=False):
-    """
-    Usage:
-
-    [gittip] $ env/bin/invoke set_paypal_email -u username -p user@example.com [-a 12e4s678] [--overwrite]
-    """
-
     load_prod_envvars()
 
     if not username or not email:
