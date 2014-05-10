@@ -15,12 +15,8 @@ from gittip import wireup
         'overwrite': "Override existing PayPal email?",
     }
 )
-def set_paypal_email(username='', email='', api_key_fragment='', overwrite=False):
+def set_paypal_email(username, email, api_key_fragment='', overwrite=False):
     load_prod_envvars()
-
-    if not username or not email:
-        print(set_paypal_email.__doc__)
-        sys.exit(1)
 
     if not api_key_fragment:
         first_eight = "unknown!"
