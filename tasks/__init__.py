@@ -15,13 +15,8 @@ from gittip import wireup
         'overwrite': "Override existing PayPal email?",
     }
 )
-def set_paypal_email(username, email, api_key_fragment='', overwrite=False):
+def set_paypal_email(username, email, api_key_fragment, overwrite=False):
     load_prod_envvars()
-
-    if not api_key_fragment:
-        first_eight = "unknown!"
-    else:
-        first_eight = api_key_fragment
 
     db = wireup.db(wireup.env())
 
@@ -53,10 +48,7 @@ def set_paypal_email(username, email, api_key_fragment='', overwrite=False):
         else:
             FEE_CAP = ''  # Don't overwrite fee_cap when overwriting email address.
 
-    if fields.api_key == None:
-        assert first_eight == "None"
-    else:
-        assert fields.api_key[0:8] == first_eight
+    assert fields.api_key[0:8] == first_eight
 
     print("Setting PayPal email for " + username + " to " + email)
 
