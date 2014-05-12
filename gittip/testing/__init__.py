@@ -7,9 +7,9 @@ import unittest
 from decimal import Decimal
 from os.path import join, dirname, realpath
 
-import pytz
 import vcr
 from aspen import resources
+from aspen.utils import utcnow
 from aspen.testing.client import Client
 from gittip.billing.payday import Payday
 from gittip.elsewhere import UserInfo
@@ -156,7 +156,7 @@ class Harness(unittest.TestCase):
         for k,v in kw.items():
             if k == 'claimed_time':
                 if v == 'now':
-                    v = datetime.datetime.now(pytz.utc)
+                    v = utcnow()
             self.db.run("UPDATE participants SET {}=%s WHERE username=%s" \
                         .format(k), (v, participant.username))
         participant.set_attributes(**kw)
